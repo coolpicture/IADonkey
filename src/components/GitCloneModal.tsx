@@ -219,8 +219,14 @@ export const GitCloneModal: React.FC<GitCloneModalProps> = ({
       } else if (e.key === 'Enter' && isOpen) {
         if (status === 'success') {
           e.preventDefault();
-          handleOpenInExplorer();
-          handleFooterClose();
+          const shouldOpenInVscode =
+            Boolean(vscodeEnabled) && (!isInstanceMode || validInstanceRepos.length === 1);
+          if (shouldOpenInVscode) {
+            handleOpenInVscode();
+          } else {
+            handleOpenInExplorer();
+            handleFooterClose();
+          }
           return;
         }
 
@@ -237,7 +243,7 @@ export const GitCloneModal: React.FC<GitCloneModalProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, status, targetDir, isInstanceMode, isLoadingRepos, validInstanceRepos.length, recursive, repoUrl, instanceRepos, onClose]);
+  }, [isOpen, status, clonedPath, targetDir, isInstanceMode, isLoadingRepos, validInstanceRepos.length, recursive, repoUrl, instanceRepos, vscodeEnabled, onClose]);
 
   if (!isOpen) return null;
 
@@ -348,7 +354,11 @@ export const GitCloneModal: React.FC<GitCloneModalProps> = ({
   };
 
   const handleOpenInVscode = async () => {
-    const pathToOpen = clonedPath || targetDir;
+    const basePath = (clonedPath || targetDir).replace(/[\\/]+$/, '');
+    const pathToOpen =
+      isInstanceMode && validInstanceRepos.length === 1 && basePath
+        ? `${basePath}\\${validInstanceRepos[0].targetSubdir}`
+        : clonedPath || targetDir;
     if (pathToOpen && window.electronAPI?.openInVscode) {
       await window.electronAPI?.resetAndHideSpotlight?.();
       await window.electronAPI.openInVscode(pathToOpen);

@@ -4,6 +4,11 @@ Všechny důležité změny v této aplikaci jsou dokumentovány v tomto souboru
 
 ---
 
+## [2.1.28] - 2. 11. 2026
+### Prioritní otevření naklonovaného repozitáře ve VS Code (GitHub a MagicGate)
+- **GitHub – Prioritní otevření naklonovaného repozitáře ve VS Code po stisku Enteru**: Po dokončení klonování repozitáře z GitHubu ve Spotlightu klávesa `Enter` nově upřednostní jeho přímé otevření ve VS Code (pokud je rozšíření VS Code zapnuté). Pokud VS Code zapnutý není, zůstává zachováno výchozí otevření složky v Průzkumníku.
+- **MagicGate – Chytré rozlišení jednoho a více repozitářů při stisku Enteru**: Pokud klonovaná instance v MagicGate obsahuje pouze jeden repozitář a v rozšířeních je zapnutý VS Code, klávesa `Enter` po stažení rovnou otevře složku tohoto repozitáře ve VS Code. Pokud instance nabízí více repozitářů sekcí, stisk `Enter` nadále upřednostní otevření kořenové složky instance v Průzkumníku.
+
 ## [2.1.27] - 30. 10. 2026
 ### Spolehlivá autentizace MagicGate Deploy API s automatickým přihlášením při vypršení relace a viditelnost tray ikony ve Windows 11
 - **MagicGate Deploy API – Ochrana uložených přihlašovacích údajů a automatické okno přihlášení**: Uložené informace o přihlášeném účtu a čase poslední synchronizace již nemizí při ukládání nastavení. Pokud na serveru vyprší platnost session cookie a tichá obnova přihlášení na pozadí přes Google SSO selže, automaticky vyskočí přihlašovací okno pro okamžité obnovení přístupu a aktualizaci instancí.

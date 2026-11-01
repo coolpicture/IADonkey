@@ -5,7 +5,7 @@ export interface VersionEntry {
   highlights: string[];
 }
 
-export const CURRENT_APP_VERSION = '2.1.27';
+export const CURRENT_APP_VERSION = '2.1.28';
 export const IS_DEV = import.meta.env.DEV;
 export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRENT_APP_VERSION;
 
@@ -13,6 +13,15 @@ export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRE
  * Uživatelsky přívětivá historie verzí (ne technický žargon, ale přehled reálných funkcí pro uživatele).
  */
 export const CHANGELOG_HISTORY: VersionEntry[] = [
+  {
+    version: '2.1.28',
+    date: '2. 11. 2026',
+    title: 'Prioritní otevření naklonovaného repozitáře ve VS Code (GitHub a MagicGate)',
+    highlights: [
+      'GitHub – Prioritní otevření naklonovaného repozitáře ve VS Code po stisku Enteru: Po dokončení klonování repozitáře z GitHubu ve Spotlightu klávesa Enter nově upřednostní jeho přímé otevření ve VS Code (pokud je rozšíření VS Code zapnuté). Pokud VS Code zapnutý není, zůstává zachováno výchozí otevření složky v Průzkumníku.',
+      'MagicGate – Chytré rozlišení jednoho a více repozitářů při stisku Enteru: Pokud klonovaná instance v MagicGate obsahuje pouze jeden repozitář a v rozšířeních je zapnutý VS Code, klávesa Enter po stažení rovnou otevře složku tohoto repozitáře ve VS Code. Pokud instance nabízí více repozitářů sekcí, stisk Enteru nadále upřednostní otevření kořenové složky instance v Průzkumníku.',
+    ],
+  },
   {
     version: '2.1.27',
     date: '30. 10. 2026',
