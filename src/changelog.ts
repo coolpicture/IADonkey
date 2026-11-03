@@ -5,7 +5,7 @@ export interface VersionEntry {
   highlights: string[];
 }
 
-export const CURRENT_APP_VERSION = '2.1.28';
+export const CURRENT_APP_VERSION = '2.1.29';
 export const IS_DEV = import.meta.env.DEV;
 export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRENT_APP_VERSION;
 
@@ -13,6 +13,14 @@ export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRE
  * Uživatelsky přívětivá historie verzí (ne technický žargon, ale přehled reálných funkcí pro uživatele).
  */
 export const CHANGELOG_HISTORY: VersionEntry[] = [
+  {
+    version: '2.1.29',
+    date: '3. 11. 2026',
+    title: 'Spolehlivé přihlašování do spících testovacích instancí MagicGate (dvoufázové probuzení a pozdržený handshake)',
+    highlights: [
+      'MagicGate – Dvoufázové probuzení spících instancí a pozdržený čerstvý handshake: Při otevírání odkazů na uspané testovací instance ze Spotlightu již nedochází k předčasnému vypršení časového limitu (timeoutu) během startu serveru. Aplikace nejprve vyčká na probuzení instance (až 90 s s automatickým opakováním při probouzení IIS AppPoolu) a teprve po jejím nastartování provede čerstvý přihlašovací handshake, takže se prohlížeč rovnou otevře v přihlášeném stavu. U běžících instancí probíhá přihlášení nadále okamžitě bez zdržení.',
+    ],
+  },
   {
     version: '2.1.28',
     date: '2. 11. 2026',

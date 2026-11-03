@@ -4,6 +4,10 @@ Všechny důležité změny v této aplikaci jsou dokumentovány v tomto souboru
 
 ---
 
+## [2.1.29] - 3. 11. 2026
+### Spolehlivé přihlašování do spících testovacích instancí MagicGate (dvoufázové probuzení a pozdržený handshake)
+- **MagicGate – Dvoufázové probuzení spících instancí a pozdržený čerstvý handshake**: Při otevírání odkazů na uspané testovací instance ze Spotlightu již nedochází k předčasnému vypršení časového limitu (timeoutu) během startu serveru. Aplikace nejprve vyčká na probuzení instance (až 90 s s automatickým opakováním při probouzení IIS AppPoolu) a teprve po jejím nastartování provede čerstvý přihlašovací handshake, takže se prohlížeč rovnou otevře v přihlášeném stavu. U běžících instancí probíhá přihlášení nadále okamžitě bez zdržení.
+
 ## [2.1.28] - 2. 11. 2026
 ### Prioritní otevření naklonovaného repozitáře ve VS Code (GitHub a MagicGate)
 - **GitHub – Prioritní otevření naklonovaného repozitáře ve VS Code po stisku Enteru**: Po dokončení klonování repozitáře z GitHubu ve Spotlightu klávesa `Enter` nově upřednostní jeho přímé otevření ve VS Code (pokud je rozšíření VS Code zapnuté). Pokud VS Code zapnutý není, zůstává zachováno výchozí otevření složky v Průzkumníku.

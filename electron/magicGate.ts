@@ -14,6 +14,21 @@ const RIJN_IV = Buffer.from([
   16, 23, 243, 15, 75, 150, 130, 237, 168, 84, 21, 214, 153, 151, 68, 133,
 ]);
 
+const FAST_WAKE_THRESHOLD_MS = 4000;
+const WAKEUP_TOTAL_TIMEOUT_MS = 90000;
+const WAKEUP_ATTEMPT_TIMEOUT_MS = 30000;
+const WAKEUP_RETRY_DELAY_MS = 1500;
+const POST_WAKEUP_SETTLE_MS = 400;
+const HANDSHAKE_TIMEOUT_MS = 20000;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientHttpStatus(status: number): boolean {
+  return status === 408 || status === 500 || status === 502 || status === 503 || status === 504 || status >= 520;
+}
+
 /**
  * Computes the internal password hash using AES-256-CBC and SHA-256
  */
@@ -95,7 +110,9 @@ export function tryImportWoxCredentials(): { username: string; password: string 
 }
 
 /**
- * Performs handshake with AutoLogin.ashx and constructs the signed auto-login URL
+ * Performs handshake with AutoLogin.ashx and constructs the signed auto-login URL.
+ * Supports sleeping test instances by waiting for instance wake-up first and then
+ * executing a delayed fresh handshake once the server is responsive.
  */
 export async function getMagicGateAutoLoginUrl(targetUrl: string, config: AppConfig): Promise<string> {
   let username = config.magicgate?.username?.trim();
@@ -116,18 +133,127 @@ export async function getMagicGateAutoLoginUrl(targetUrl: string, config: AppCon
 
   const parsed = new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`);
   const baseUrl = `${parsed.protocol}//${parsed.host}`;
+  const tokenUrl = `${baseUrl}/AutoLogin.ashx?UN=${encodeURIComponent(username)}`;
+
+  const overallStart = Date.now();
+  const deadline = overallStart + WAKEUP_TOTAL_TIMEOUT_MS;
+  let attempt = 0;
+  let wasSleeping = false;
+  let tokenText: string | null = null;
+  let wakeUpTokenFallback: string | null = null;
+  let lastError: unknown = null;
 
   console.log(`[MagicGate] Requesting handshake from ${baseUrl}/AutoLogin.ashx for user ${username}...`);
-  const tokenUrl = `${baseUrl}/AutoLogin.ashx?UN=${encodeURIComponent(username)}`;
-  const tokenRes = await fetch(tokenUrl, { signal: AbortSignal.timeout(15000) });
 
-  if (!tokenRes.ok) {
-    throw new Error(`AutoLogin handshake selhal (HTTP ${tokenRes.status})`);
+  // Phase 1: Initial probe / wake-up loop for sleeping instances
+  while (Date.now() < deadline) {
+    attempt++;
+    const attemptStart = Date.now();
+    const remainingMs = deadline - attemptStart;
+    if (remainingMs <= 0) break;
+
+    const attemptTimeoutMs = Math.max(5000, Math.min(WAKEUP_ATTEMPT_TIMEOUT_MS, remainingMs));
+
+    try {
+      const res = await fetch(tokenUrl, {
+        signal: AbortSignal.timeout(attemptTimeoutMs),
+        cache: 'no-store',
+      });
+
+      const elapsedMs = Date.now() - overallStart;
+
+      if (!res.ok) {
+        const statusErr = new Error(`AutoLogin handshake selhal (HTTP ${res.status})`);
+        if (isTransientHttpStatus(res.status) && Date.now() + WAKEUP_RETRY_DELAY_MS < deadline) {
+          wasSleeping = true;
+          lastError = statusErr;
+          console.warn(
+            `[MagicGate] Instance ${baseUrl} waking up (HTTP ${res.status} on attempt ${attempt} after ${elapsedMs}ms), retrying...`
+          );
+          await delay(WAKEUP_RETRY_DELAY_MS);
+          continue;
+        }
+        throw statusErr;
+      }
+
+      const bodyText = await res.text();
+      if (bodyText.startsWith('OK')) {
+        // Fast response on first attempt -> instance is already awake, use token directly
+        if (attempt === 1 && !wasSleeping && elapsedMs <= FAST_WAKE_THRESHOLD_MS) {
+          tokenText = bodyText;
+          break;
+        }
+
+        // Instance was sleeping (took longer than threshold or required retries)
+        wasSleeping = true;
+        wakeUpTokenFallback = bodyText;
+        console.log(
+          `[MagicGate] Sleeping instance ${baseUrl} woke up after ${elapsedMs}ms (attempt ${attempt}). Delaying for fresh handshake...`
+        );
+        break;
+      }
+
+      // Non-OK body: if it looks like an HTML startup/error page during cold start, retry
+      const trimmedBody = bodyText.trimStart();
+      if ((trimmedBody.startsWith('<') || elapsedMs > FAST_WAKE_THRESHOLD_MS) && Date.now() + WAKEUP_RETRY_DELAY_MS < deadline) {
+        wasSleeping = true;
+        lastError = new Error(`AutoLogin server odmítl požadavek: ${bodyText.slice(0, 200)}`);
+        console.warn(`[MagicGate] Instance ${baseUrl} returned non-OK response during wake-up (attempt ${attempt}), retrying...`);
+        await delay(WAKEUP_RETRY_DELAY_MS);
+        continue;
+      }
+
+      throw new Error(`AutoLogin server odmítl požadavek: ${bodyText}`);
+    } catch (err: any) {
+      const isTimeoutOrNetwork =
+        err?.name === 'TimeoutError' ||
+        err?.name === 'AbortError' ||
+        err?.name === 'TypeError' ||
+        /timeout|aborted|fetch failed|ECONN|ENOTFOUND|UND_ERR/i.test(String(err?.message || err));
+
+      if (isTimeoutOrNetwork && Date.now() + WAKEUP_RETRY_DELAY_MS < deadline) {
+        wasSleeping = true;
+        lastError = err;
+        console.warn(
+          `[MagicGate] Instance ${baseUrl} did not respond on attempt ${attempt} (${err?.message || err}), waiting for wake-up...`
+        );
+        await delay(WAKEUP_RETRY_DELAY_MS);
+        continue;
+      }
+
+      throw err;
+    }
   }
 
-  const tokenText = await tokenRes.text();
-  if (!tokenText.startsWith('OK')) {
-    throw new Error(`AutoLogin server odmítl požadavek: ${tokenText}`);
+  // Phase 2: Delayed fresh handshake once the sleeping instance has woken up
+  if (wasSleeping && !tokenText) {
+    await delay(POST_WAKEUP_SETTLE_MS);
+    try {
+      console.log(`[MagicGate] Executing delayed handshake on warmed-up instance ${baseUrl}/AutoLogin.ashx...`);
+      const freshRes = await fetch(tokenUrl, {
+        signal: AbortSignal.timeout(HANDSHAKE_TIMEOUT_MS),
+        cache: 'no-store',
+      });
+      if (freshRes.ok) {
+        const freshText = await freshRes.text();
+        if (freshText.startsWith('OK')) {
+          tokenText = freshText;
+        }
+      }
+    } catch (freshErr: any) {
+      console.warn(`[MagicGate] Delayed fresh handshake failed, checking fallback token:`, freshErr?.message || freshErr);
+      lastError = freshErr;
+    }
+
+    if (!tokenText && wakeUpTokenFallback) {
+      tokenText = wakeUpTokenFallback;
+    }
+  }
+
+  if (!tokenText) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('AutoLogin handshake vypršel (spící instance se neprobudila v časovém limitu 90 s).');
   }
 
   const rawKey = tokenText.substring(2);

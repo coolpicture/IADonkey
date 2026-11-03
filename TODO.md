@@ -39,13 +39,3 @@ Aktuální seznam úkolů projektu rozdělený na otevřené k realizaci s podro
 ## ✅ Dokončené úkoly (čekající na kontrolu / revizi)
 
 *(Žádné dokončené úkoly nečekají na revizi)*
-
-
-
-
-
-
-
-
-
-
