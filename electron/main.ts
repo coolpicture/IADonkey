@@ -2846,7 +2846,7 @@ function setupIpcHandlers() {
         if (!skipHide && !preserveSpotlight && sourceId !== 'source-manager') {
           windowManager.hideSpotlight();
         }
-        if (autoPaste || sourceId === 'snippet' || action === 'paste') {
+        if (autoPaste !== undefined ? autoPaste : (sourceId === 'snippet' || action === 'paste')) {
           const hwnd = windowManager.getMainWindowHandle();
           pasteService.simulatePaste(150, hwnd);
         }

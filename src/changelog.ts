@@ -5,7 +5,7 @@ export interface VersionEntry {
   highlights: string[];
 }
 
-export const CURRENT_APP_VERSION = '2.1.29';
+export const CURRENT_APP_VERSION = '2.1.30';
 export const IS_DEV = import.meta.env.DEV;
 export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRENT_APP_VERSION;
 
@@ -13,6 +13,14 @@ export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRE
  * Uživatelsky přívětivá historie verzí (ne technický žargon, ale přehled reálných funkcí pro uživatele).
  */
 export const CHANGELOG_HISTORY: VersionEntry[] = [
+  {
+    version: '2.1.30',
+    date: '4. 11. 2026',
+    title: 'Sjednocen? automatick?ho vkl?d?n? (auto-paste) u akce copy ve Spotlightu s chov?n?m schr?nky EasyClip',
+    highlights: [
+      'Spotlight ? Automatick? vlo?en? do aktivn?ho kurzoru u akce copy: V?echny polo?ky a podakce s akc? copy (kalkula?ka, FTP adresy, barvy ColorMasteru i vlastn? zdroje) se nyn? chovaj? jednotn? se schr?nkou EasyClip ? potvrzen? kl?vesou Enter nebo kliknut?m my?? hodnotu zkop?ruje a rovnou vlo?? do aktivn?ho kurzoru v okn? pod Spotlightem, zat?mco kombinace Ctrl+Enter (nebo Ctrl+Klik) hodnotu pouze zkop?ruje do schr?nky bez vlo?en?.',
+    ],
+  },
   {
     version: '2.1.29',
     date: '3. 11. 2026',

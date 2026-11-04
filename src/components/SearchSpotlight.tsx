@@ -4702,7 +4702,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
   ]);
 
   // Execute selected item
-  const handleExecute = async (item: LauncherItem) => {
+  const handleExecute = async (item: LauncherItem, shouldPaste: boolean = true) => {
     if (!item) return;
 
     const isCalculator = item.id === 'calculator-result' || item.icon === 'calculate';
@@ -4916,6 +4916,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
           await window.electronAPI.executeAction({
             action: 'copy',
             location: toCopy,
+            autoPaste: shouldPaste,
             skipHide: true,
           });
         } catch (err) {
@@ -4943,7 +4944,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
             location: toCopy,
             settings: item.settings,
             sourceId: item.sourceId,
-            autoPaste: isSnippet,
+            autoPaste: shouldPaste,
             skipHide: true,
           });
         } catch (err) {
@@ -5008,7 +5009,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
   };
 
   // Execute action from actions mode
-  const handleExecuteAction = async (parent: LauncherItem, actionItem: LauncherAction) => {
+  const handleExecuteAction = async (parent: LauncherItem, actionItem: LauncherAction, shouldPaste: boolean = true) => {
     const actionType = actionItem.action;
     const effectiveSettings = actionItem.settings || parent.settings;
     const isCalculatorParent = parent.id === 'calculator-result' || parent.icon === 'calculate';
@@ -5120,6 +5121,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
             action: 'copy',
             location: effectiveLocation,
             settings: effectiveSettings,
+            autoPaste: shouldPaste,
             skipHide: true,
           });
         } catch (err) {
@@ -5488,7 +5490,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
         e.preventDefault();
         const chosen = actionsList[selectedActionIndex];
         if (chosen) {
-          handleExecuteAction(actionsParentItem, chosen);
+          handleExecuteAction(actionsParentItem, chosen, !e.ctrlKey && !isCtrlDown);
         }
       } else if (e.key === 'Escape') {
         e.preventDefault();
@@ -5938,10 +5940,18 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
         return;
       }
 
-      // 2. Ctrl + Enter -> Directly execute 1st subitem or original action
+      // 2. Ctrl + Enter -> Directly execute 1st subitem, copy without paste, or original action
       if (e.ctrlKey) {
         if (currentItem.options && currentItem.options.length > 0) {
-          handleExecute(currentItem.options[0]);
+          handleExecute(currentItem.options[0], true);
+          return;
+        }
+        if (
+          currentItem.action === 'copy' ||
+          currentItem.action === 'paste' ||
+          currentItem.id === 'colormaster-detected-color'
+        ) {
+          handleExecute(currentItem, false);
           return;
         }
         const origAction = currentItem.actions?.find(
@@ -5954,7 +5964,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
             a.action !== 'delete-source-subitem'
         );
         if (origAction) {
-          handleExecuteAction(currentItem, origAction);
+          handleExecuteAction(currentItem, origAction, false);
           return;
         }
         return;
@@ -6095,10 +6105,18 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
       return;
     }
 
-    // 2. Ctrl + Click -> Execute 1st subitem
+    // 2. Ctrl + Click -> Execute 1st subitem or copy without paste
     if (e.ctrlKey) {
       if (item.options && item.options.length > 0) {
-        handleExecute(item.options[0]);
+        handleExecute(item.options[0], true);
+        return;
+      }
+      if (
+        item.action === 'copy' ||
+        item.action === 'paste' ||
+        item.id === 'colormaster-detected-color'
+      ) {
+        handleExecute(item, false);
       }
       return;
     }
@@ -7290,7 +7308,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
                       data-action-selected={isSelected}
                       onClick={() => {
                         setSelectedActionIndex(idx);
-                        handleExecuteAction(actionsParentItem, action);
+                        handleExecuteAction(actionsParentItem, action, !isCtrlDown);
                       }}
                       className={`relative flex items-center px-3.5 py-2.5 rounded-2xl cursor-pointer transition-all duration-150 gap-3.5 overflow-hidden ${itemSelectedClass}`}
                     >
@@ -7351,7 +7369,9 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
                             <span className="text-gray-400 italic text-[11px]">Připravujeme...</span>
                           ) : (
                             <span className={`${actionTextClass} text-xs font-semibold`}>
-                              Provést
+                              {action.action === 'copy' || action.action === 'paste'
+                                ? (isCtrlDown ? 'Kopírovat' : 'Vložit')
+                                : 'Provést'}
                             </span>
                           )}
                         </div>
@@ -7366,14 +7386,20 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
           {/* Actions & Info Floating Action Bar Footer */}
           <div className="mx-2 my-2 px-4 py-2 flex items-center justify-between text-xs text-gray-400 select-none">
             <div className="flex items-center gap-4 flex-wrap">
-              {hasItemActions(actionsParentItem) && (
-                <span className="text-xs font-semibold flex items-center gap-1.5">
-                  <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 bg-white/[0.08] m3-actions-text rounded-full font-mono text-[9px] leading-none select-none">
-                    Enter
-                  </kbd>
-                  <span className="text-white">Provést</span>
-                </span>
-              )}
+              {hasItemActions(actionsParentItem) && (() => {
+                const selectedAction = getItemActions(actionsParentItem)[selectedActionIndex];
+                const isCopyAction = selectedAction?.action === 'copy' || selectedAction?.action === 'paste';
+                return (
+                  <span className="text-xs font-semibold flex items-center gap-1.5">
+                    <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 bg-white/[0.08] m3-actions-text rounded-full font-mono text-[9px] leading-none select-none">
+                      {isCopyAction && isCtrlDown ? 'Ctrl+Enter' : 'Enter'}
+                    </kbd>
+                    <span className="text-white">
+                      {isCopyAction ? (isCtrlDown ? 'Kopírovat' : 'Vložit') : 'Provést'}
+                    </span>
+                  </span>
+                );
+              })()}
             </div>
             <div className="flex items-center gap-2">
               {hasItemActions(actionsParentItem) && (
@@ -8361,7 +8387,7 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
                           </span>
                         ) : (item.action === 'copy' || item.action === 'paste') ? (
                           <span className="text-xs font-semibold text-emerald-400 animate-in fade-in duration-100">
-                            Kopírovat
+                            {isCtrlDown && !hasOptions ? 'Kopírovat' : 'Vložit'}
                           </span>
                         ) : (
                           <span className="text-xs font-semibold m3-primary-text animate-in fade-in duration-100">
@@ -8411,9 +8437,15 @@ export const SearchSpotlight: React.FC<SearchSpotlightProps> = ({
                 ) : results[selectedIndex]?.action === 'copy' || results[selectedIndex]?.action === 'paste' ? (
                   <span className="text-xs font-semibold flex items-center gap-1.5">
                     <kbd className="inline-flex items-center justify-center px-1.5 py-0.5 bg-white/[0.08] text-emerald-400 rounded-full font-mono text-[9px] leading-none select-none">
-                      Enter
+                      {isCtrlDown && !(results[selectedIndex]?.options && results[selectedIndex].options!.length > 0)
+                        ? 'Ctrl+Enter'
+                        : 'Enter'}
                     </kbd>
-                    <span className="text-white">Kopírovat</span>
+                    <span className="text-white">
+                      {isCtrlDown && !(results[selectedIndex]?.options && results[selectedIndex].options!.length > 0)
+                        ? 'Kopírovat'
+                        : 'Vložit'}
+                    </span>
                   </span>
                 ) : (
                   <span className="text-xs font-semibold flex items-center gap-1.5">
