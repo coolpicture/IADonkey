@@ -5,7 +5,7 @@ export interface VersionEntry {
   highlights: string[];
 }
 
-export const CURRENT_APP_VERSION = '2.1.31';
+export const CURRENT_APP_VERSION = '2.1.32';
 export const IS_DEV = import.meta.env.DEV;
 export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRENT_APP_VERSION;
 
@@ -13,6 +13,14 @@ export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRE
  * Uživatelsky přívětivá historie verzí (ne technický žargon, ale přehled reálných funkcí pro uživatele).
  */
 export const CHANGELOG_HISTORY: VersionEntry[] = [
+  {
+    version: '2.1.32',
+    date: '17. 11. 2026',
+    title: 'Ověření automatických aktualizací z nového repozitáře coolpicture/IADonkey',
+    highlights: [
+      'Automatické aktualizace – Ověřovací vydání z repozitáře coolpicture/IADonkey: Potvrzení přímého stahování a instalace aktualizací z nového distribučního repozitáře po spuštění opravného balíčku.',
+    ],
+  },
   {
     version: '2.1.31',
     date: '17. 11. 2026',

@@ -4,6 +4,10 @@ Všechny důležité změny v této aplikaci jsou dokumentovány v tomto souboru
 
 ---
 
+## [2.1.32] - 17. 11. 2026
+### Ověření automatických aktualizací z nového repozitáře coolpicture/IADonkey
+- **Automatické aktualizace – Ověřovací vydání z repozitáře `coolpicture/IADonkey`**: Potvrzení přímého stahování a instalace aktualizací z nového distribučního repozitáře po spuštění opravného balíčku.
+
 ## [2.1.31] - 17. 11. 2026
 ### Přechod na nový distribuční repozitář coolpicture/IADonkey a automatická migrace aktualizací
 - **Automatické aktualizace – Přechod na nový repozitář `coolpicture/IADonkey`**: Výchozí zdroj pro kontrolu a stahování nových verzí aplikace byl přesunut na repozitář `coolpicture/IADonkey` s automatickou migrací stávající konfigurace při startu aplikace.
