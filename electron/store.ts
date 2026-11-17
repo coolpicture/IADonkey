@@ -117,7 +117,7 @@ const DEFAULT_CONFIG: AppConfig = {
     magicplan: true,
     feedback: true,
   },
-  updateUrl: 'https://raw.githubusercontent.com/2visionic/IADonkey/main/version.json',
+  updateUrl: 'https://raw.githubusercontent.com/coolpicture/IADonkey/main/version.json',
   lastDeclinedVersion: null,
   lastDeclinedTime: null,
   autoSyncIntervalMinutes: 30,
@@ -149,7 +149,7 @@ export class AppStore {
     try {
       if (fs.existsSync(CONFIG_FILE)) {
         const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
-        return raw.includes('magicware/IADonkey') || raw.includes('iadonkey/launcher');
+        return raw.includes('2visionic/IADonkey') || raw.includes('magicware/IADonkey') || raw.includes('iadonkey/launcher');
       }
     } catch {}
     return false;
@@ -228,6 +228,7 @@ export class AppStore {
       // Auto-migrate legacy / dummy placeholder repository URL
       if (
         !cfg.updateUrl ||
+        cfg.updateUrl.includes('2visionic/IADonkey') ||
         cfg.updateUrl.includes('iadonkey/launcher') ||
         cfg.updateUrl.includes('magicware/IADonkey')
       ) {

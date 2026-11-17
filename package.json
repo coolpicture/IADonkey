@@ -1,6 +1,6 @@
 {
   "name": "iadonkey",
-  "version": "2.1.30",
+  "version": "2.1.31",
   "description": "IADonkey Launcher",
   "author": "Petr Coolhanek",
   "main": "dist-electron/main.js",

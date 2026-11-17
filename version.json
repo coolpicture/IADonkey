@@ -1,6 +1,6 @@
 {
-  "version": "2.1.30",
-  "releaseNotes": "• Spotlight – Sjednocení automatického vkládání (auto-paste) u akce copy s chováním schránky EasyClip (Enter pro okamžité vložení do aktivního kurzoru, Ctrl+Enter pro pouhé zkopírování do schránky).",
-  "downloadUrl": "https://github.com/2visionic/IADonkey/releases/download/v2.1.30/IADonkey-Setup-2.1.30.exe",
-  "zipUrl": "https://github.com/2visionic/IADonkey/releases/download/v2.1.30/IADonkey-2.1.30.zip"
+  "version": "2.1.31",
+  "releaseNotes": "• Automatické aktualizace – Přechod na nový distribuční repozitář coolpicture/IADonkey.\n• Spotlight – Sjednocení automatického vkládání (auto-paste) u akce copy s chováním schránky EasyClip (Enter pro vložení do aktivního kurzoru, Ctrl+Enter pro pouhé zkopírování).",
+  "downloadUrl": "https://github.com/coolpicture/IADonkey/releases/download/v2.1.31/IADonkey-Setup-2.1.31.exe",
+  "zipUrl": "https://github.com/coolpicture/IADonkey/releases/download/v2.1.31/IADonkey-2.1.31.zip"
 }

@@ -4,6 +4,10 @@ Všechny důležité změny v této aplikaci jsou dokumentovány v tomto souboru
 
 ---
 
+## [2.1.31] - 17. 11. 2026
+### Přechod na nový distribuční repozitář coolpicture/IADonkey a automatická migrace aktualizací
+- **Automatické aktualizace – Přechod na nový repozitář `coolpicture/IADonkey`**: Výchozí zdroj pro kontrolu a stahování nových verzí aplikace byl přesunut na repozitář `coolpicture/IADonkey` s automatickou migrací stávající konfigurace při startu aplikace.
+
 ## [2.1.30] - 4. 11. 2026
 ### Sjednocen? automatick?ho vkl?d?n? (auto-paste) u akce copy ve Spotlightu s chov?n?m schr?nky EasyClip
 - **Spotlight ? Automatick? vlo?en? do aktivn?ho kurzoru u akce copy**: V?echny polo?ky a podakce s akc? `copy` (kalkula?ka, FTP adresy, barvy ColorMasteru i vlastn? zdroje) se nyn? chovaj? jednotn? se schr?nkou EasyClip ? potvrzen? kl?vesou `Enter` nebo kliknut?m my?? hodnotu zkop?ruje a rovnou vlo?? do aktivn?ho kurzoru v okn? pod Spotlightem, zat?mco kombinace `Ctrl+Enter` (nebo `Ctrl+Klik`) hodnotu pouze zkop?ruje do schr?nky bez vlo?en?.
