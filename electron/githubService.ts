@@ -1,4 +1,27 @@
+import dns from 'node:dns';
 import type { GithubSettings, LauncherItem } from '../src/types';
+
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {}
+
+async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
+  let lastErr: any;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, {
+        ...options,
+        signal: options.signal || AbortSignal.timeout(15000),
+      });
+    } catch (err) {
+      lastErr = err;
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastErr;
+}
 
 export interface GitHubTestResult {
   ok: boolean;
@@ -216,7 +239,7 @@ export async function testGitHubConnection(settings?: GithubSettings): Promise<G
 
   try {
     // 1. Fetch authenticated user profile
-    const userRes = await fetch(`${base}/user`, { headers });
+    const userRes = await fetchWithRetry(`${base}/user`, { headers });
     if (!userRes.ok) {
       if (userRes.status === 401) {
         return { ok: false, error: 'Neplatný token (HTTP 401 Unauthorized).' };
@@ -228,7 +251,7 @@ export async function testGitHubConnection(settings?: GithubSettings): Promise<G
     // 2. Fetch user's organizations
     let orgNames: string[] = [];
     try {
-      const orgsRes = await fetch(`${base}/user/orgs`, { headers });
+      const orgsRes = await fetchWithRetry(`${base}/user/orgs`, { headers });
       if (orgsRes.ok) {
         const orgsData = (await orgsRes.json()) as Array<{ login: string }>;
         orgNames = orgsData.map((o) => o.login);
@@ -265,24 +288,19 @@ export async function fetchGitHubRepos(settings?: GithubSettings): Promise<Launc
   const headers = getHeaders(token);
   const reposMap = new Map<number, RawGitHubRepo>();
 
-  // Fetch page 1 (and 2 if needed) of user repos (including orgs membership)
-  try {
-    const userReposUrl = `${base}/user/repos?per_page=100&affiliation=owner,collaborator,organization_member&sort=updated`;
-    const res = await fetch(userReposUrl, { headers, signal: AbortSignal.timeout(15000) });
-    if (res.ok) {
-      const data = (await res.json()) as RawGitHubRepo[];
-      if (Array.isArray(data)) {
-        for (const repo of data) {
-          if (repo && repo.id) {
-            reposMap.set(repo.id, repo);
-          }
-        }
+  // Fetch user repos (including private repos and orgs membership) - throw on failure so cache is never wiped by partial public-only results
+  const userReposUrl = `${base}/user/repos?per_page=100&affiliation=owner,collaborator,organization_member&sort=updated`;
+  const userReposRes = await fetchWithRetry(userReposUrl, { headers });
+  if (!userReposRes.ok) {
+    throw new Error(`GitHub API /user/repos vrátil HTTP ${userReposRes.status}`);
+  }
+  const userReposData = (await userReposRes.json()) as RawGitHubRepo[];
+  if (Array.isArray(userReposData)) {
+    for (const repo of userReposData) {
+      if (repo && repo.id) {
+        reposMap.set(repo.id, repo);
       }
-    } else {
-      console.warn(`[GitHubService] /user/repos returned status ${res.status}`);
     }
-  } catch (err) {
-    console.error('[GitHubService] Error fetching user repos:', err);
   }
 
   // If a specific username is set or known via OAuth, fetch that user's repos as well to guarantee full coverage

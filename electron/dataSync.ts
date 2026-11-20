@@ -264,6 +264,7 @@ export class DataSyncManager {
       }
 
       // Load GitHub repositories if configured and enabled
+      const previousGhItems = this.store.getItems().filter((it) => it.sourceId === 'github');
       let ghCount = 0;
       if (hasGitHubStep) {
         onProgress?.({
@@ -285,11 +286,15 @@ export class DataSyncManager {
           });
           faviconService.fetchFaviconForUrl('https://github.com').catch(() => {});
         } catch (err: any) {
-          console.error('[DataSync] Error loading GitHub repos:', err);
+          console.error('[DataSync] Error loading GitHub repos, preserving cached items:', err);
+          if (previousGhItems.length > 0) {
+            ghCount = previousGhItems.length;
+            allItems.push(...previousGhItems);
+          }
           diagnosticsService.logAction({
             type: 'sync',
-            title: 'Chyba synchronizace GitHub repozitářů',
-            details: err?.message || String(err),
+            title: 'Chyba synchronizace GitHub repozitářů (ponechána cache)',
+            details: `${err?.message || String(err)} (zachováno ${previousGhItems.length} repozitářů)`,
             status: 'error',
           });
         }

@@ -1,6 +1,6 @@
 {
-  "version": "2.1.32",
-  "releaseNotes": "• Automatické aktualizace – Ověření funkčnosti auto-update systému z nového distribučního repozitáře coolpicture/IADonkey.",
-  "downloadUrl": "https://github.com/coolpicture/IADonkey/releases/download/v2.1.32/IADonkey-Setup-2.1.32.exe",
-  "zipUrl": "https://github.com/coolpicture/IADonkey/releases/download/v2.1.32/IADonkey-2.1.32.zip"
+  "version": "2.1.33",
+  "releaseNotes": "• GitHub – Spolehlivá synchronizace soukromých i veřejných repozitářů bez mizení výsledků na pozadí (vynucení IPv4, automatické opakování při výpadku spojení, zachování offline cache a ochrana OAuth tokenu při ukládání nastavení).",
+  "downloadUrl": "https://github.com/coolpicture/IADonkey/releases/download/v2.1.33/IADonkey-Setup-2.1.33.exe",
+  "zipUrl": "https://github.com/coolpicture/IADonkey/releases/download/v2.1.33/IADonkey-2.1.33.zip"
 }

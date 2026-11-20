@@ -4,6 +4,11 @@ Všechny důležité změny v této aplikaci jsou dokumentovány v tomto souboru
 
 ---
 
+## [2.1.33] - 19. 11. 2026
+### Spolehlivá synchronizace GitHub repozitářů bez mizení výsledků na pozadí
+- **GitHub – Oprava mizení soukromých repozitářů při synchronizaci na pozadí**: Při periodické synchronizaci již nedochází k přepsání načtených soukromých repozitářů pouze veřejnými repozitáři nebo prázdným seznamem v případě krátkodobého výpadku spojení k `api.github.com`. Komunikace nově upřednostňuje IPv4, automaticky opakuje dotaz při chybě sítě a při nedostupnosti serveru vždy zachová dříve načtené repozitáře z lokální cache.
+- **GitHub OAuth – Ochrana uloženého přihlášení při souběžném ukládání nastavení**: Uložený OAuth token a informace o přihlášeném profilu jsou v úložišti konfigurace chráněny proti nechtěnému přepsání při ukládání změn z jiného okna aplikace.
+
 ## [2.1.32] - 17. 11. 2026
 ### Ověření automatických aktualizací z nového repozitáře coolpicture/IADonkey
 - **Automatické aktualizace – Ověřovací vydání z repozitáře `coolpicture/IADonkey`**: Potvrzení přímého stahování a instalace aktualizací z nového distribučního repozitáře po spuštění opravného balíčku.

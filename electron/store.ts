@@ -212,6 +212,13 @@ export class AppStore {
           };
         }
 
+        if (parsed.github) {
+          cfg.github = {
+            ...DEFAULT_CONFIG.github,
+            ...parsed.github,
+          };
+        }
+
         if (parsed.notifications) {
           cfg.notifications = {
             ...DEFAULT_CONFIG.notifications,
@@ -326,10 +333,28 @@ export class AppStore {
           }
         : prevMg;
 
+      const prevGh = this.config?.github;
+      const nextGh = newConfig?.github;
+      const mergedGithub = nextGh
+        ? {
+            ...prevGh,
+            ...nextGh,
+            oauthToken:
+              nextGh.oauthToken !== undefined
+                ? nextGh.oauthToken
+                : prevGh?.oauthToken,
+            oauthUser:
+              nextGh.oauthToken === ''
+                ? undefined
+                : (nextGh.oauthUser ?? prevGh?.oauthUser),
+          }
+        : prevGh;
+
       this.config = {
         ...this.config,
         ...newConfig,
         magicgate: mergedMagicgate as any,
+        github: mergedGithub as any,
       };
       this.writeConfigToDisk();
     } catch (err) {

@@ -5,7 +5,7 @@ export interface VersionEntry {
   highlights: string[];
 }
 
-export const CURRENT_APP_VERSION = '2.1.32';
+export const CURRENT_APP_VERSION = '2.1.33';
 export const IS_DEV = import.meta.env.DEV;
 export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRENT_APP_VERSION;
 
@@ -13,6 +13,15 @@ export const DISPLAY_APP_VERSION = IS_DEV ? `${CURRENT_APP_VERSION} dev` : CURRE
  * Uživatelsky přívětivá historie verzí (ne technický žargon, ale přehled reálných funkcí pro uživatele).
  */
 export const CHANGELOG_HISTORY: VersionEntry[] = [
+  {
+    version: '2.1.33',
+    date: '19. 11. 2026',
+    title: 'Spolehlivá synchronizace GitHub repozitářů bez mizení výsledků na pozadí',
+    highlights: [
+      'GitHub – Oprava mizení soukromých repozitářů při synchronizaci na pozadí: Při periodické synchronizaci již nedochází k přepsání načtených soukromých repozitářů pouze veřejnými repozitáři nebo prázdným seznamem v případě krátkodobého výpadku spojení k api.github.com. Komunikace nově upřednostňuje IPv4, automaticky opakuje dotaz při chybě sítě a při nedostupnosti serveru vždy zachová dříve načtené repozitáře z lokální cache.',
+      'GitHub OAuth – Ochrana uloženého přihlášení při souběžném ukládání nastavení: Uložený OAuth token a informace o přihlášeném profilu jsou v úložišti konfigurace chráněny proti nechtěnému přepsání při ukládání změn z jiného okna aplikace.',
+    ],
+  },
   {
     version: '2.1.32',
     date: '17. 11. 2026',
